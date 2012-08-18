@@ -41,7 +41,7 @@ typedef enum {
 @protocol PullToRefreshViewDelegate;
 
 @interface PullToRefreshView : UIView {
-	__unsafe_unretained id <PullToRefreshViewDelegate> delegate;
+	id<PullToRefreshViewDelegate> delegate;
 	UIScrollView *scrollView;
 	PullToRefreshViewState state;
 	UIImageView *arrowImage;
@@ -63,5 +63,4 @@ typedef enum {
 
 @optional
 - (void)pullToRefreshViewShouldRefresh:(PullToRefreshView *)view;
-
 @end
