@@ -44,10 +44,6 @@ typedef enum {
 	id<PullToRefreshViewDelegate> delegate;
 	UIScrollView *scrollView;
 	PullToRefreshViewState state;
-
-	UILabel *subtitleLabel;
-	UILabel *statusLabel;
-	CALayer *arrowImage;
 	CALayer *offlineImage;
 	UIActivityIndicatorView *activityView;
 }

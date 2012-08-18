@@ -70,35 +70,6 @@
 
 		self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.backgroundColor = kPullToRefreshViewBackgroundColor;
-
-		subtitleLabel = [[UILabel alloc] init];
-		subtitleLabel.frame = CGRectMake(0.0f, frame.size.height - 30.0f, self.frame.size.width, 20.0f);
-		subtitleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-		subtitleLabel.font = [UIFont systemFontOfSize:12.0f];
-		subtitleLabel.textColor = kPullToRefreshViewSubtitleColor;
-        subtitleLabel.shadowColor = [UIColor colorWithWhite:0.9f alpha:1.0f];
-		subtitleLabel.shadowOffset = CGSizeMake(0.0f, 1.0f);
-		subtitleLabel.backgroundColor = [UIColor clearColor];
-		subtitleLabel.textAlignment = UITextAlignmentCenter;
-		[self addSubview:subtitleLabel];
-
-		statusLabel = [[UILabel alloc] init];
-		statusLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-		statusLabel.font = [UIFont systemFontOfSize:12.f];
-		statusLabel.textColor = kPullToRefreshViewTitleColor;
-        statusLabel.shadowColor = [UIColor colorWithWhite:0.9f alpha:1.0f];
-        statusLabel.shadowOffset = CGSizeMake(0.0f, 1.0f);
-		statusLabel.backgroundColor = [UIColor clearColor];
-		statusLabel.textAlignment = UITextAlignmentCenter;
-		[self addSubview:statusLabel];
-
-		arrowImage = [[CALayer alloc] init];
-        arrowImage.frame = CGRectMake(25.0f, frame.size.height - 60.0f, 24.0f, 52.0f);
-		arrowImage.contentsGravity = kCAGravityResizeAspect;
-        arrowImage.contents = (id) [UIImage imageNamed:@"arrow"].CGImage;
-
-        activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-        activityView.frame = CGRectMake(30.0f, frame.size.height - 38.0f, 20.0f, 20.0f);
         [self addSubview:activityView];
 
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 40000
@@ -126,7 +97,6 @@
 	[formatter setAMSymbol:@"AM"];
 	[formatter setPMSymbol:@"PM"];
 	[formatter setDateFormat:@"MM/dd/yy hh:mm a"];
-	subtitleLabel.text = [NSString stringWithFormat:@"Last Updated: %@", [formatter stringFromDate:date]];
 	[formatter release];
 }
 
@@ -136,7 +106,6 @@
 
 - (void)finishedLoading {
     if (state == kPullToRefreshViewStateLoading || state == kPullToRefreshViewStateProgrammaticRefresh) {
-        [self refreshLastUpdatedDate];
         [UIView beginAnimations:nil context:NULL];
         [UIView setAnimationDuration:0.3f];
         [self setState:kPullToRefreshViewStateNormal];
@@ -150,20 +119,17 @@
 
 	switch (state) {
 		case kPullToRefreshViewStateReady:
-		    statusLabel.text = @"Release to refresh…";
             [self showActivity:NO animated:NO];
             [self setImageFlipped:YES];
             scrollView.contentInset = UIEdgeInsetsZero;
 		    break;
 		case kPullToRefreshViewStateNormal:
-		    statusLabel.text = @"Pull down to refresh…";
             [self showActivity:NO animated:NO];
             [self setImageFlipped:NO];
             scrollView.contentInset = UIEdgeInsetsZero;
 		    break;
 		case kPullToRefreshViewStateLoading:
         case kPullToRefreshViewStateProgrammaticRefresh:
-		    statusLabel.text = @"Loading…";
             [self showActivity:YES animated:YES];
             [self setImageFlipped:NO];
 		    scrollView.contentInset = UIEdgeInsetsMake(fminf(-scrollView.contentOffset.y, -kPullToRefreshViewTriggerOffset), 0, 0, 0);
