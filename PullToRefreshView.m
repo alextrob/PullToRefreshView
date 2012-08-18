@@ -47,40 +47,49 @@
 - (void)showActivity:(BOOL)show animated:(BOOL)animated {
     if (show) [activityView startAnimating];
     else [activityView stopAnimating];
-
+	
     [UIView beginAnimations:nil context:nil];
     [UIView setAnimationDuration:(animated ? kPullToRefreshViewAnimationDuration : 0.0)];
-    arrowImage.opacity = (show ? 0.0 : 1.0);
+    arrowImage.layer.opacity = (show ? 0.0 : 1.0);
     [UIView commitAnimations];
 }
 
 - (void)setImageFlipped:(BOOL)flipped {
     [UIView beginAnimations:nil context:NULL];
     [UIView setAnimationDuration:kPullToRefreshViewAnimationDuration];
-    arrowImage.transform = (flipped ? CATransform3DMakeRotation(M_PI * 2, 0.0f, 0.0f, 1.0f) : CATransform3DMakeRotation(M_PI, 0.0f, 0.0f, 1.0f));
+    arrowImage.layer.transform = (flipped ? CATransform3DMakeRotation(M_PI * 2, 0.0f, 0.0f, 1.0f) : CATransform3DMakeRotation(M_PI, 0.0f, 0.0f, 1.0f));
     [UIView commitAnimations];
 }
 
 - (id)initWithScrollView:(UIScrollView *)scroll {
 	CGRect frame = CGRectMake(0.0f, 0.0f - scroll.bounds.size.height, scroll.bounds.size.width, scroll.bounds.size.height);
-
+	
 	if ((self = [super initWithFrame:frame])) {
 		scrollView = [scroll retain];
 		[scrollView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew context:NULL];
-
+		
 		self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.backgroundColor = kPullToRefreshViewBackgroundColor;
+		
+		arrowImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"arrow"]];
+		arrowImage.frame = CGRectMake(0.0f, frame.size.height - 44.0f, self.frame.size.width, 20.0f);
+		arrowImage.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+		arrowImage.layer.contentsGravity = kCAGravityResizeAspect;
+		
+        activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+        activityView.frame = arrowImage.frame;
+		activityView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         [self addSubview:activityView];
-
+		
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 40000
 		if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
-			arrowImage.contentsScale = [[UIScreen mainScreen] scale];
+			arrowImage.layer.contentsScale = [[UIScreen mainScreen] scale];
 		}
 #endif
-
-		[self.layer addSublayer:arrowImage];
+		[self addSubview:arrowImage];
+		
+        [self setState:kPullToRefreshViewStateNormal];
 	}
-
 	return self;
 }
 
@@ -89,10 +98,10 @@
 
 - (void)refreshLastUpdatedDate {
     NSDate *date = [NSDate date];
-
+	
 	if ([delegate respondsToSelector:@selector(pullToRefreshViewLastUpdated:)])
 		date = [delegate pullToRefreshViewLastUpdated:self];
-
+	
 	NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
 	[formatter setAMSymbol:@"AM"];
 	[formatter setPMSymbol:@"PM"];
@@ -116,7 +125,7 @@
 - (void)setState:(PullToRefreshViewState)state_ {
 	if (state_ == state) return;
 	state = state_;
-
+	
 	switch (state) {
 		case kPullToRefreshViewStateReady:
             [self showActivity:NO animated:NO];
@@ -126,6 +135,7 @@
 		case kPullToRefreshViewStateNormal:
             [self showActivity:NO animated:NO];
             [self setImageFlipped:NO];
+            [self refreshLastUpdatedDate];
             scrollView.contentInset = UIEdgeInsetsZero;
 		    break;
 		case kPullToRefreshViewStateLoading:
@@ -133,11 +143,13 @@
             [self showActivity:YES animated:YES];
             [self setImageFlipped:NO];
 		    scrollView.contentInset = UIEdgeInsetsMake(fminf(-scrollView.contentOffset.y, -kPullToRefreshViewTriggerOffset), 0, 0, 0);
+            if ([delegate respondsToSelector:@selector(pullToRefreshViewShouldRefresh:)])
+                [delegate pullToRefreshViewShouldRefresh:self];
 		    break;
 		default:
 		    break;
 	}
-
+	
 	[self setNeedsLayout];
 }
 
@@ -162,7 +174,7 @@
 				}
 			} else if (state == kPullToRefreshViewStateLoading || state == kPullToRefreshViewStateProgrammaticRefresh) {
 				// if the user scrolls the view down while we're loading, make sure the loading screen is visible if they scroll to the top:
-
+				
 				if (scrollView.contentOffset.y >= 0) {
 					// this lets the table headers float to the top
 					scrollView.contentInset = UIEdgeInsetsZero;
@@ -174,17 +186,14 @@
 		} else {
 			if (state == kPullToRefreshViewStateReady) {
 				// if we're in state ready and a drag stops, then transition to loading.
-
+				
 				[UIView beginAnimations:nil context:NULL];
 				[UIView setAnimationDuration:kPullToRefreshViewAnimationDuration];
 				[self setState:kPullToRefreshViewStateLoading];
 				[UIView commitAnimations];
-
-				if ([delegate respondsToSelector:@selector(pullToRefreshViewShouldRefresh:)])
-					[delegate pullToRefreshViewShouldRefresh:self];
 			}
 		}
-
+		
         // Fix for view moving laterally with webView
         self.frame = CGRectMake(scrollView.contentOffset.x, self.frame.origin.y, self.frame.size.width, self.frame.size.height);
 	}
@@ -201,7 +210,7 @@
 
 - (void)dealloc {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-
+	
 	if (scrollView != nil) { // probably leaking the scrollView
 		NSLog(@"PullToRefreshView: Leaking a scrollView?");
 		[scrollView release];
