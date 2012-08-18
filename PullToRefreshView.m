@@ -65,7 +65,6 @@
 	CGRect frame = CGRectMake(0.0f, 0.0f - scroll.bounds.size.height, scroll.bounds.size.width, scroll.bounds.size.height);
 	
 	if ((self = [super initWithFrame:frame])) {
-		scrollView = [scroll retain];
 		[scrollView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew context:NULL];
 		
 		self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -205,7 +204,6 @@
 
 - (void)containingViewDidUnload {
 	[scrollView removeObserver:self forKeyPath:@"contentOffset"];
-	[scrollView release];
 	scrollView = nil;
 }
 
@@ -214,12 +212,7 @@
 	
 	if (scrollView != nil) { // probably leaking the scrollView
 		NSLog(@"PullToRefreshView: Leaking a scrollView?");
-		[scrollView release];
-	}
-	
-	[arrowImage release];
-	
-	[super dealloc];
+	}	
 }
 
 @end
