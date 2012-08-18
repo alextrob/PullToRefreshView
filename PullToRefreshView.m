@@ -90,6 +90,7 @@
 		
         [self setState:kPullToRefreshViewStateNormal];
 	}
+	
 	return self;
 }
 
@@ -215,11 +216,9 @@
 		NSLog(@"PullToRefreshView: Leaking a scrollView?");
 		[scrollView release];
 	}
-
+	
 	[arrowImage release];
-	[statusLabel release];
-	[subtitleLabel release];
-
+	
 	[super dealloc];
 }
 
