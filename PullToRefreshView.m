@@ -29,9 +29,9 @@
 #import "PullToRefreshView.h"
 #import <math.h>
 
-#define kPullToRefreshViewBackgroundColor [UIColor colorWithRed:226.0/255.0 green:231.0/255.0 blue:237.0/255.0 alpha:1.0]
-#define kPullToRefreshViewTitleColor [UIColor colorWithRed:(87.0/255.0) green:(108.0/255.0) blue:(137.0/255.0) alpha:1.0]
-#define kPullToRefreshViewSubtitleColor kPullToRefreshViewTitleColor
+#define kPullToRefreshViewBackgroundColor [UIColor colorWithRed:0.278 green:0.278 blue:0.278 alpha:1.000]
+#define kPullToRefreshViewTitleColor [UIColor whiteColor]
+#define kPullToRefreshViewSubtitleColor [UIColor whiteColor]
 #define kPullToRefreshViewAnimationDuration 0.18f
 #define kPullToRefreshViewTriggerOffset -65.0f
 
