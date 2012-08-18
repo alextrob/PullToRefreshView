@@ -96,19 +96,6 @@
 #pragma mark -
 #pragma mark Setters
 
-- (void)refreshLastUpdatedDate {
-    NSDate *date = [NSDate date];
-	
-	if ([delegate respondsToSelector:@selector(pullToRefreshViewLastUpdated:)])
-		date = [delegate pullToRefreshViewLastUpdated:self];
-	
-	NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-	[formatter setAMSymbol:@"AM"];
-	[formatter setPMSymbol:@"PM"];
-	[formatter setDateFormat:@"MM/dd/yy hh:mm a"];
-	[formatter release];
-}
-
 - (void)beginLoading {
     [self setState:kPullToRefreshViewStateProgrammaticRefresh];
 }
@@ -135,7 +122,6 @@
 		case kPullToRefreshViewStateNormal:
             [self showActivity:NO animated:NO];
             [self setImageFlipped:NO];
-            [self refreshLastUpdatedDate];
             scrollView.contentInset = UIEdgeInsetsZero;
 		    break;
 		case kPullToRefreshViewStateLoading:
